@@ -6,6 +6,12 @@
 # 3. Four of five consecutive points plot beyond a 1-sigma limit.
 # 4. Eight consecutive points plot on one side of the center line.
 
+#Additional HC Rules
+# Remove rule 3
+# 5. 15 points in zone C
+# 6. 6 or more points increasing or decreasing
+
+
 qccRules <- function(object, rules = object$rules)
 {
   # Return a vector of indices for cases (statistics & new.statistics) 
@@ -15,6 +21,16 @@ qccRules <- function(object, rules = object$rules)
     stop("input object must be of class 'qcc'")
   stats <- c(object$statistics, object$newstats)
   out <- rep(NA, length(stats))
+  if(any(rules == 6)) 
+  {  
+    wer <- qccRulesViolatingHC6(object)
+    out[wer] <- 6
+  }
+  if(any(rules == 5))
+    {  
+      wer <- qccRulesViolatingHC5(object)
+      out[wer] <- 5
+    }
   if(any(rules == 4)) 
   {  
     wer <- qccRulesViolatingWER4(object)
@@ -113,79 +129,29 @@ qccRulesViolatingWER4 <- function(object)
     violators <- c(violators, vbeg.below[i]:vend.below[i]) }
   return(violators)
 }
-
-
-
-#
-# Functions used to signal points out of control in 'qcc' version <= 2.x
-#
-# TODO: to remove when new rules are ok
-
-shewhart.rules <- function(object, limits = object$limits, run.length = qcc.options("run.length"))
+qccRulesViolatingHC5 <- function(object, ...)
 {
-# Return a list of cases beyond limits and violating runs
-  bl <- beyond.limits(object, limits = limits)
-  vr <- violating.runs(object, run.length = run.length)
-  list(beyond.limits = bl, violating.runs = vr)
-}
-
-# shewhartRules <- function(object, 
-#                            limits = object$limits, 
-#                            run.length = qcc.options("run.length"))
-# {
-#   # Return a vector of indices for cases (statistics & new.statistics) 
-#   # violating the two basic Shewhart rules (NA if no rule is violated)
-#   stats <- c(object$statistics, object$newstats)
-#   out <- rep(NA, length(stats))
-#   bl <- beyond.limits(object, limits = limits)
-#   vr <- violating.runs(object, run.length = run.length)
-#   out[vr] <- 2
-#   out[bl] <- 1
-#   attr(out, "rules") <- "shr"
-#   return(out)
-# }
-
-beyond.limits <- function(object, limits = object$limits)
-{
-  # Return cases beyond limits
-  statistics <- c(object$statistics, object$newstats) 
-  lcl <- limits[,1]
-  ucl <- limits[,2]
-  index.above.ucl <- seq(along = statistics)[statistics > ucl]
-  index.below.lcl <- seq(along = statistics)[statistics < lcl]
-  return(c(index.above.ucl, index.below.lcl))
-}
-
-violating.runs <- function(object, run.length = qcc.options("run.length"))
+  qccRulesViolatingWER2(object, 
+                        run.points = 15,
+                        run.length = 15,
+                        k = object$nsigmas*1/3)
+} 
+qccRulesViolatingHC6 <- function(object)
 {
   # Return indices of points violating runs
-  if(run.length == 0)
-    return(numeric())
+  run.length <- 6
   center <- object$center
   statistics <- c(object$statistics, object$newstats)
-  cl <- object$limits
-  diffs <- statistics - center
+  cl <- object$limit
+  diffs <- diff(object$statistics)
   diffs[diffs > 0] <- 1
   diffs[diffs < 0] <- -1
   runs <- rle(diffs)
-  vruns <- rep(runs$lengths >= run.length, runs$lengths)
-  vruns.above <- (vruns & (diffs > 0))
-  vruns.below <- (vruns & (diffs < 0))
-  rvruns.above <- rle(vruns.above)
-  rvruns.below <- rle(vruns.below)
-  vbeg.above <- cumsum(rvruns.above$lengths)[rvruns.above$values] -
-    (rvruns.above$lengths - run.length)[rvruns.above$values]
-  vend.above <- cumsum(rvruns.above$lengths)[rvruns.above$values]
-  vbeg.below <- cumsum(rvruns.below$lengths)[rvruns.below$values] -
-    (rvruns.below$lengths - run.length)[rvruns.below$values]
-  vend.below <- cumsum(rvruns.below$lengths)[rvruns.below$values]
+  vruns <- rep(runs$lengths >= 6, runs$lengths)
   violators <- numeric()
-  if (length(vbeg.above)) 
-  { for (i in 1:length(vbeg.above))
-    violators <- c(violators, vbeg.above[i]:vend.above[i]) }
-  if (length(vbeg.below)) 
-  { for (i in 1:length(vbeg.below))
-    violators <- c(violators, vbeg.below[i]:vend.below[i]) }
+  if (length(vruns)) 
+  { for (i in 1:length(vruns))
+    violators <- c(violators, vruns[i]) }
   return(violators)
 }
 
