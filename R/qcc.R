@@ -568,7 +568,7 @@ plot.qcc <- function(x,
   
   if(!is.null(violations))
   { 
-    for(j in 1:4)
+    for(j in 1:6)
        {
          i <- (indices %in% which(violations==j))
          col[i] <- qcc.options("rules")$col[j]
