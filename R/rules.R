@@ -146,9 +146,16 @@ qccRulesViolatingHC6 <- function(object)
   diffs[diffs > 0] <- 1
   diffs[diffs < 0] <- -1
   runs <- rle(diffs)
-  vruns <- rep(runs$lengths >= 6, runs$lengths)
-  return(seq(along = statistics)[violators == 1])
+  rvruns <- rle(vruns)
+  vbeg <- cumsum(rvruns$lengths)[rvruns$values] -(rvruns$lengths - run.length)[rvruns$values]
+  vend <- cumsum(rvruns$lengths)[rvruns$values]
+  violators <- numeric()
+  if (length(vbeg)) 
+  { for (i in 1:length(vbeg))
+    violators <- c(violators, vbeg[i]:vend[i]) }
+  return(violators)
 }
+
 
 shewhart.rules <- function(object, limits = object$limits, run.length = qcc.options("run.length"))
 {
