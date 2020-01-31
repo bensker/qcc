@@ -142,6 +142,7 @@ qccRulesViolatingHC6 <- function(object)
   run.length <- 6
   center <- object$center
   statistics <- c(object$statistics, object$newstats)
+  diffs <- diff(object$statistics)
   diffs[diffs > 0] <- 1
   diffs[diffs < 0] <- -1
   runs <- rle(diffs)
