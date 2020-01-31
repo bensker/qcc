@@ -146,6 +146,7 @@ qccRulesViolatingHC6 <- function(object)
   diffs[diffs > 0] <- 1
   diffs[diffs < 0] <- -1
   runs <- rle(diffs)
+  vruns <- rep(runs$lengths >= run.length, runs$lengths)
   rvruns <- rle(vruns)
   vbeg <- cumsum(rvruns$lengths)[rvruns$values] -(rvruns$lengths - run.length)[rvruns$values]
   vend <- cumsum(rvruns$lengths)[rvruns$values]
