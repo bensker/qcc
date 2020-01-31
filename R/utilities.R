@@ -140,7 +140,7 @@ qcc.options <- function(...)
              pch = c(19, 20),
              run.length = 7),
   rules = list(col = c("#F03B20", "#FD8D3C", "#FEB24C", "#FED976","#DAA520","#F08080"), 
-               pch = c(19, 15, 17, 20, 19, 15)),
+               pch = c(19, 15, 17, 20, 18, 18)),
   zones = list(fill = "#81a1c1",
                lty = c(2,2,2), 
                col = grey(c(0.1, 0.4, 0.7))),
