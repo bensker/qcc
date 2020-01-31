@@ -142,17 +142,11 @@ qccRulesViolatingHC6 <- function(object)
   run.length <- 6
   center <- object$center
   statistics <- c(object$statistics, object$newstats)
-  cl <- object$limit
-  diffs <- diff(object$statistics)
   diffs[diffs > 0] <- 1
   diffs[diffs < 0] <- -1
   runs <- rle(diffs)
   vruns <- rep(runs$lengths >= 6, runs$lengths)
-  violators <- numeric()
-  if (length(vruns)) 
-  { for (i in 1:length(vruns))
-    violators <- c(violators, vruns[i]) }
-  return(violators)
+  return(seq(along = statistics)[violators == 1])
 }
 
 shewhart.rules <- function(object, limits = object$limits, run.length = qcc.options("run.length"))
