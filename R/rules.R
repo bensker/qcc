@@ -11,6 +11,18 @@
 # 5. 15 points in zone C
 # 6. 6 or more points increasing or decreasing
 
+#create custom embed function
+embed <- function(x, m, d = 1, as.embed = TRUE) {
+  n <- length(x) - (m-1)*d
+  if(n <= 0)
+    stop("Insufficient observations for the requested embedding")
+  out <- matrix(rep(x[seq_len(n)], m), ncol = m)
+  out[,-1] <- out[,-1, drop = FALSE] +
+    rep(seq_len(m - 1) * d, each = nrow(out))
+  if(as.embed)
+    out <- out[, rev(seq_len(ncol(out)))]
+  out
+}
 
 qccRules <- function(object, rules = object$rules)
 {
