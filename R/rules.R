@@ -81,7 +81,7 @@ qccRulesViolatingWER1 <- function(object, limits = object$limits)
 qccRulesViolatingWER2 <- function(object,
                                   run.points = 2,
                                   run.length = 3,
-                                  k = object$nsigmas*2/3)
+                                  k = object$nsigmas)
 {
   # Return indices of points violating runs
   center     <- object$center
@@ -106,7 +106,7 @@ qccRulesViolatingWER3 <- function(object, ...)
   qccRulesViolatingWER2(object,
                         run.points = 4,
                         run.length = 5,
-                        k = object$nsigmas*1/3)
+                        k = object$nsigmas*2/3)
 }
 
 qccRulesViolatingWER4 <- function(object)
