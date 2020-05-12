@@ -12,16 +12,28 @@
 # 6. 6 or more points increasing or decreasing
 
 #create custom embed function
-embed <- function(x, m, d = 1, as.embed = TRUE) {
-  n <- length(x) - (m-1)*d
-  if(n <= 0)
-    stop("Insufficient observations for the requested embedding")
-  out <- matrix(rep(x[seq_len(n)], m), ncol = m)
-  out[,-1] <- out[,-1, drop = FALSE] +
-    rep(seq_len(m - 1) * d, each = nrow(out))
-  if(as.embed)
-    out <- out[, rev(seq_len(ncol(out)))]
-  out
+embed <- function (x, dimension = 1)
+{
+    if (is.matrix(x)) {
+        n <- nrow(x)
+        m <- ncol(x)
+        if ((dimension < 1) | (dimension > n))
+            stop ("wrong embedding dimension")
+        y <- matrix(0.0, n - dimension + 1L, dimension * m)
+        for (i in seq_len(m))
+            y[, seq.int(i, by = m, length.out = dimension)] <-
+                Recall (as.vector(x[,i]), dimension)
+        return (y)
+    } else if (is.vector(x) || is.ts(x)) {
+        n <- length (x)
+        if ((dimension < 1) | (dimension > n))
+            stop ("wrong embedding dimension")
+        m <- n - dimension + 1L
+        data <- x[1L:m + rep.int(dimension:1L, rep.int(m, dimension)) - 1L]
+        dim(data) <- c(m, dimension)
+        return(data)
+    } else
+        stop ("'x' is not a vector or matrix")
 }
 
 qccRules <- function(object, rules = object$rules)
@@ -81,7 +93,7 @@ qccRulesViolatingWER1 <- function(object, limits = object$limits)
 qccRulesViolatingWER2 <- function(object,
                                   run.points = 2,
                                   run.length = 3,
-                                  k = object$nsigmas)
+                                  k = object$nsigmas*2/3)
 {
   # Return indices of points violating runs
   center     <- object$center
@@ -106,7 +118,7 @@ qccRulesViolatingWER3 <- function(object, ...)
   qccRulesViolatingWER2(object,
                         run.points = 4,
                         run.length = 5,
-                        k = object$nsigmas*2/3)
+                        k = object$nsigmas*1/3)
 }
 
 qccRulesViolatingWER4 <- function(object)
